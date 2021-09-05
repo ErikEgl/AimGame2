@@ -1,0 +1,140 @@
+//style guide: All node elements vars will start with $
+
+let $start = document.querySelector('#start');
+let $game = document.querySelector('#game');
+let $time = document.querySelector('#time');
+let $result = document.querySelector('#result');
+let $gameTime = document.querySelector('#game-time');
+let $timeHeader = document.querySelector('#time-header');
+let $resultHeader = document.querySelector('#result-header');
+
+
+const colors = [
+  '#CF203Eff',
+  '#C42546ff',
+  '#BA2A4Eff',
+  '#AF2F57ff',
+  '#A5345Fff',
+  '#9A3967ff',
+  '#903F6Fff',
+  '#854477ff',
+  '#7A497Fff',
+  '#704E88ff',
+  '#655390ff',
+  '#5B5898ff',
+  '#505DA0ff',
+  '#F5C900ff',
+  '#E1BB0Cff',
+  '#CDAD18ff',
+  '#B9A023ff',
+  '#A5922Fff',
+  '#91843Bff',
+  '#7C7647ff',
+  '#686853ff',
+  '#545A5Fff',
+  '#404D6Aff',
+  '#2C3F76ff',
+  '#183182ff',
+];
+
+
+
+let score = 0;
+let isGameStarted = false;
+
+$start.addEventListener('click', startGame);
+$game.addEventListener('click', handleBoxClick);
+$gameTime.addEventListener('input', setGameTime);
+
+function show($el) {
+  $el.classList.remove('hide');
+}
+function hide($el) {
+  $el.classList.add('hide');
+}
+
+//start game btn click
+function startGame() {
+  setGameTime();
+  $gameTime.setAttribute('disabled', 'true');
+  score = 0;
+
+  isGameStarted = true;
+
+  $game.style.backgroundColor = '#fff';
+  hide($start);
+
+  let interval = setInterval(function () {
+    let time = parseFloat($time.textContent);
+    if (time <= 0) {
+      clearInterval(interval);
+      endGame();
+    } else {
+      $time.textContent = (time - 0.1).toFixed(1);
+    }
+  }, 100);
+
+  renderBox();
+}
+
+function setGameScore() {
+  $result.textContent = score.toString();
+}
+
+function setGameTime() {
+  let time = +$gameTime.value;
+  $time.textContent = time.toFixed(1);
+  show($timeHeader);
+  hide($resultHeader);
+}
+
+function endGame() {
+  isGameStarted = false;
+  setGameScore();
+  $gameTime.removeAttribute('disabled');
+
+
+  show($start)
+  $game.innerHTML = '';
+
+  $game.style.backgroundColor = '#ccc';
+
+  hide($timeHeader);
+  show($resultHeader)
+}
+
+//box click while playing game
+function handleBoxClick(event) {
+  if (!isGameStarted) {
+    console.log(isGameStarted);
+    return;
+  }
+  if (event.target.dataset.box) {
+    score++;
+    renderBox();
+  }
+}
+
+//box generation
+function renderBox() {
+  $game.innerHTML = '';
+  let box = document.createElement('div');
+  let boxSize = getRandom(30, 100);
+  let gameSize = $game.getBoundingClientRect();
+  let maxTop = gameSize.height - boxSize;
+  let maxLeft = gameSize.width - boxSize;
+  let randomColorIndex = getRandom(0, colors.length)
+
+  box.style.height = box.style.width = boxSize + 'px';
+  box.style.position = 'absolute';
+  box.style.backgroundColor = colors[randomColorIndex];
+  box.style.top = getRandom(0, maxTop) + 'px';
+  box.style.left = getRandom(0, maxLeft) + 'px';
+  box.style.cursor = 'pointer';
+  box.setAttribute('data-box', 'true');
+  $game.insertAdjacentElement('afterbegin', box);
+}
+
+function getRandom(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
